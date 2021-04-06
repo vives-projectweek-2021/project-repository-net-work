@@ -19,11 +19,14 @@ Who:
 Materials:
 
 * Raspberry Pi
-* Switch with port mirror of exit interface to router
+* Switch
 
 Why:
 
-* ...
+* Easy to capture realtime bandwidth
+* Running capture software to collect most used IP addresses
+* Running website to visualize the collected data + modify settings
+* Switch is used to mirror the traffic from the exit interface to the router to the Raspberry Pi
 
 ### Led Strip
 
