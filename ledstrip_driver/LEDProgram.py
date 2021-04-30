@@ -10,12 +10,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
 # LED strip configuration:
-LED_COUNT      = 16    # Number of LED pixels.
+LED_COUNT      = 60   # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
-LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_FREQ_HZ    = 801000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS = 100    # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 50    # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 INPUT          = 0
@@ -57,7 +57,7 @@ def run(server_class=HTTPServer, handler_class=Server, port=3000):
     httpd.serve_forever()
 
 def displayProcent(procent):
-    if procent > 100:
+    if procent >= 100:
         procent = 100
     percent(strip,Color(255,255,255),procent)
 
@@ -71,91 +71,20 @@ def percent(strip, color, data, wait_ms=2):
         #strip.show()
     
     for i in range(0,data):
-        if(i < 7):
+        if(i < LED_COUNT/3):
             #strip.setPixelColor(i, Color(0,0,0))
             strip.setPixelColor(i,Color(0,255,0))
         #strip.show()
-        if(i >= 7 and i <= 11):
+        if(i >= LED_COUNT/3 and i <= LED_COUNT-LED_COUNT/3):
             
             #strip.setPixelColor(i, Color(0,0,0))
             strip.setPixelColor(i, Color(255,128,0))
         #strip.show()
-        if(i > 11):
+        if(i > LED_COUNT-LED_COUNT/3):
             #strip.setPixelColor(i, Color(0,0,0))
             strip.setPixelColor(i, Color(255,0,0))
         #strip.show()        
     strip.show()
-
-
-
-        
-        
-            
-    # if(data >= 1 and data <= 10):
-    #     for i in range(0,int((LED_COUNT/100)*10)):
-    #         strip.setPixelColor(i,Color(0,255,0))
-    #         strip.show()
-        
-
-    # if(data >= 10 and data <= 20):
-    #     for i in range(0,int((LED_COUNT/100)*20)):
-    #         strip.setPixelColor(i, Color(0,255,0))
-    #     strip.show()
-        
-
-    # if(data >= 20 and data <= 30):
-    #     for i in range(0,int((LED_COUNT/100)*30)):
-    #         strip.setPixelColor(i, Color(0,255,0))
-    #     strip.show()
-        
-
-    # if(data >= 30 and data <= 40):
-    #     for i in range(0,int((LED_COUNT/100)*40)):
-    #         strip.setPixelColor(i, Color(0,255,0))
-    #     strip.show()
-       
-
-    # if(data >= 40 and data <= 50):
-    #     for i in range(0,int((LED_COUNT/100)*50)):
-    #         strip.setPixelColor(i, Color(255,128,0))
-    #     strip.show()
-        
-
-    # if(data >= 50 and data <= 60):
-    #     for i in range(0,int((LED_COUNT/100)*60)):
-    #         for j in range(0,int((LED_COUNT/100)*40)):
-    #             strip.setPixelColor(j, Color(0,255,0))
-    #         for k in range(int(LED_COUNT/100)*40,int(LED_COUNT/100)*60):
-    #             strip.setPixelColor(k, Color(255,128,0))
-    #     strip.show()
-        
-
-    # if(data >= 60 and data <= 70):
-    #     for i in range(0,int((LED_COUNT/100)*70)):
-    #         strip.setPixelColor(i, Color(255,128,0))
-    #     strip.show()
-        
-
-    # if(data >= 70 and data <= 80):
-    #     for i in range(0,int((LED_COUNT/100)*80)):
-    #         strip.setPixelColor(i, Color(255,0,0))
-    #     strip.show()
-        
-
-    # if(data >= 80 and data <= 90):
-    #     for i in range (0,int((LED_COUNT/100)*90)):
-    #         strip.setPixelColor(i, Color(255,0,0))
-    #     strip.show()
-        
-
-    # if(data >= 90 and data <= 100):
-    #     for i in range(0,int(LED_COUNT)):
-    #         strip.setPixelColor(i, Color(255,128,0))
-    #     strip.show()
-    
-        
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
