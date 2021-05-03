@@ -1,5 +1,5 @@
 // sudo ip link set eth0 promisc on
-const MAX_kbps = 600000
+const MAX_kbps = 1000000
 
 import {BandwidthMonitor} from './bandwidthMonitor'
 import axios from 'axios'
