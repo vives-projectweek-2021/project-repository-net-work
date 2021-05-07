@@ -7,37 +7,28 @@
   <div class="intro">
     <p>uitleg project</p>
   </div>
+  <h3>Bandwidth in use:</h3>
+  <k-progress :percent="bandwidth" color="#f5da3f"/>
+
   <h3>Captured data overview</h3>      
     <div v-for="list in stats" :key="list" class="card grey lighten-1">
-      <span class="card-title">{{list.name}}</span>
-      <div style="display:grid; grid-auto-flow:column;">
-        <ul>
+      <span class="card-title" style="margin: 20px;">{{list.name}}</span>
+      <div style="display:grid; grid-auto-flow:column;" class="grey lighten-2">
+        <div class="center">
           TO
+        <ul>
           <li v-for="item in list.to" :key=" item">{{item.ip}} : {{item.data}}</li>
         </ul>
-        <ul>
+        </div>
+        <div class="center">
           FROM
+        <ul>
           <li v-for="item in list.from" :key=" item">{{item.ip}} : {{item.data}}</li>
         </ul>
-      </div>
-    </div>
-
-<!--
-      <div style="display:flex;">
-        <div v-for="list in stats" :key="list" style="display:block;">
-          {{list.name}}
-          <ul>
-            to
-            <li v-for="item in list.to" :key=" item">{{item.ip}} : {{item.data}}</li>
-          </ul>
-          <ul>
-            from
-            <li v-for="item in list.from" :key=" item">{{item.ip}} : {{item.data}}</li>
-          </ul>
         </div>
       </div>
--->
-      
+    </div>
+     
     <footer class="footer">
       <p>
       <strong>Net-work</strong> by Dimi Catrysse, Emiel Coucke, Seppe De Witte, Sirine Rajhi - Project Week 2021
@@ -52,7 +43,8 @@ export default {
   data(){
       return {
         stats: undefined,
-        ws: new WebSocket(`ws://${window.location.hostname}:4000`)
+        ws: new WebSocket(`ws://${window.location.hostname}:4000`),
+        bandwidth: 0
       }
   },
   mounted() {
@@ -60,6 +52,13 @@ export default {
       const data = JSON.parse(message.data)
       if(data.stats) {
         this.stats = data.stats
+      }
+      else if(data.bandwidth)
+      {
+        let bandwidth = data.bandwidth
+        bandwidth<0?0:bandwidth
+        bandwidth>100?100:bandwidth
+        this.bandwidth = bandwidth
       }
       console.log(data)
     })
@@ -90,8 +89,11 @@ export default {
 
 <style>
 * {
-  background-color: rgba(248, 248, 248, 0.959);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #eceff1;
   margin: 20px;
 }
 
@@ -109,13 +111,14 @@ h3 {
   text-align: center;
   font: 12;
 }
+/*
 .card-title {
   text-decoration: none;
   font-weight: bolder;
     background-color: rgb(169, 169, 169) ;
 color: white;
 }
-/*
+
 .card {
   background-color: rgb(169, 169, 169) ;
 }
