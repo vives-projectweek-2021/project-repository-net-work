@@ -38,12 +38,4 @@ Who:
 Materials:
 
 * LED-strip with WS2812b Protocol
-* BreadBoard -> Later PCB-Design
-* Mosfets voor grotere stroom
-* 74AHCT125 IC
 
-Why:
-
-* The GPIO from the raspberry pi only gives a voltage of 3.3V and to send data to the ledstrip we need te convert this to a 5V voltage.
-* To get a larger current we are going to use mosfets to power the ledstrips.
-* To connect this all together we are going to make an PCB design because a breadboard is unreliable and the connections are more secure with an pcb design.
