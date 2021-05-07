@@ -4,35 +4,40 @@
   <h1>Net-Work</h1>
   <p>Overview of captured network data</p>
   </header>
-      {{stats}}
-      <br/>
-      <br/>
-      {{top10_blacklist_from}}
-      <br/>
-      <br/>
-      {{top10_whitelist_from}}
-      <br/>
-      <br/>
-      {{top10_grey_from}}
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      {{top10_blacklist_to}}
-      <br/>
-      <br/>
-      {{top10_whitelist_to}}
-      <br/>
-      <br/>
-      {{top10_grey_to }}
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      {{top10_grey_to }}
+  <div class="intro">
+    <p>uitleg project</p>
+  </div>
+  <h3>Captured data overview</h3>      
+    <div v-for="list in stats" :key="list" class="card grey lighten-1">
+      <span class="card-title">{{list.name}}</span>
+      <div style="display:grid; grid-auto-flow:column;">
+        <ul>
+          TO
+          <li v-for="item in list.to" :key=" item">{{item.ip}} : {{item.data}}</li>
+        </ul>
+        <ul>
+          FROM
+          <li v-for="item in list.from" :key=" item">{{item.ip}} : {{item.data}}</li>
+        </ul>
+      </div>
+    </div>
 
-  
+<!--
+      <div style="display:flex;">
+        <div v-for="list in stats" :key="list" style="display:block;">
+          {{list.name}}
+          <ul>
+            to
+            <li v-for="item in list.to" :key=" item">{{item.ip}} : {{item.data}}</li>
+          </ul>
+          <ul>
+            from
+            <li v-for="item in list.from" :key=" item">{{item.ip}} : {{item.data}}</li>
+          </ul>
+        </div>
+      </div>
+-->
+      
     <footer class="footer">
       <p>
       <strong>Net-work</strong> by Dimi Catrysse, Emiel Coucke, Seppe De Witte, Sirine Rajhi - Project Week 2021
@@ -41,58 +46,43 @@
 </div>
 </template>
 
-<script lang='ts'>
+<script>
 export default {
   name: 'App',
   data(){
-
       return {
         stats: undefined,
-        topLists: [],
-        top10_blacklist_from: undefined,
-        top10_whitelist_from: undefined,
-        top10_grey_from: undefined,
-        top10_blacklist_to: undefined,
-        top10_whitelist_to: undefined,
-        top10_grey_to: undefined
-
+        ws: new WebSocket(`ws://${window.location.hostname}:4000`)
       }
   },
   mounted() {
-    fetch(`http://${window.location.hostname}:4000/stats`)
-    .then(response => response.json())
-    .then(data => {
+    this.ws.addEventListener('message', message => {
+      const data = JSON.parse(message.data)
+      if(data.stats) {
+        this.stats = data.stats
+      }
       console.log(data)
-      this.stats = data
-
-
-      this.top10_blacklist_from = data.find(x=>x.name==='blacklist').stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + b.UDP_from)).slice(0,10)
-      this.top10_whitelist_from = data.find(x=>x.name==='whitelist').stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + b.UDP_from)).slice(0,10)
-      this.top10_grey_from = data.find(x=>x.name==='unknown').stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + b.UDP_from)).slice(0,10)
-      this.top10_blacklist_to = data.find(x=>x.name==='blacklist').stats.sort((a,b)=>(b.TCP_to + b.UDP_to) - (a.TCP_to + b.UDP_to)).slice(0,10)
-      this.top10_whitelist_to = data.find(x=>x.name==='whitelist').stats.sort((a,b)=>(b.TCP_to + b.UDP_to) - (a.TCP_to + b.UDP_to)).slice(0,10)
-      this.top10_grey_to = data.find(x=>x.name==='unknown').stats.sort((a,b)=>(b.TCP_to + b.UDP_to) - (a.TCP_to + b.UDP_to)).slice(0,10)
-      console.log(this.top10_grey_to)
-
-      data.forEach(list => {
-        console.log(list)
-        let items_to = []
-        list.stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + b.UDP_from)).slice(0,10).forEach(item => {
-          items_to.push({ip: item.ip, data: item.TCP_from + item.UDP_from})
-        });
-        console.log(items_to)
-        let top10 = {
-          name: list.name,
-          direction: 'to',
-          items: items_to
-        }
-          console.log(top10)
-        this.topLists.push(top10)
-        console.log(this.topLists)
-        
-      });
-      
     })
+    this.askstats(5)
+
+  },
+  methods: {
+    askstats(amount) {
+      this.sendWSData({stats: amount})
+    },
+    sendWSData(data) {
+      if(this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify(data))
+      } else {
+        const retryInterval = setInterval( () => {
+          if(this.ws.readyState)
+          {
+            this.ws.send(JSON.stringify(data))
+            clearInterval(retryInterval)
+          }
+        }, 100)
+      }
+    }
   }
 
 }
@@ -100,7 +90,7 @@ export default {
 
 <style>
 * {
-  background-color: rgba(245, 234, 234, 0.959);
+  background-color: rgba(248, 248, 248, 0.959);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 20px;
 }
@@ -114,29 +104,36 @@ header p {
   font-style: italic;
 }
 
-table {
-  align-items: center;
-  margin: auto;
-
+h3 {
+  color: rgb(169, 169, 169);
+  text-align: center;
+  font: 12;
+}
+.card-title {
+  text-decoration: none;
+  font-weight: bolder;
+    background-color: rgb(169, 169, 169) ;
+color: white;
+}
+/*
+.card {
+  background-color: rgb(169, 169, 169) ;
 }
 
-li {
-  list-style-type: none;
+.card ul {
+  background-color: rgb(169, 169, 169) ;
 }
 
-table td {
-border-style: solid;
+.card ul li {
+  background-color: rgb(169, 169, 169) ;
 }
- 
-h2 {
-  text-decoration: underline;
-}
+*/
+
 footer {
   text-align: center;
-  position: fixed;
   width: 100%;
   bottom: 0px;
-  display:none;
+  
 }
 
 </style>
