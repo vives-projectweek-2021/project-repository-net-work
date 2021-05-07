@@ -1,5 +1,29 @@
+// sudo ip link set eth0 promisc on
+const MAX_kbps = 1000000
+
 import IPv4LookupList from './IPv4LookupList'
 import packetMonitor from './packetMonitor'
+import {BandwidthMonitor} from './bandwidthMonitor'
+import axios from 'axios'
+
+const monitor = new BandwidthMonitor()
+
+monitor.on('data', data => {
+    const bytespersecond = data.rx.bytespersecond
+    const kbps = bytespersecond/125
+    const percent = kbps/MAX_kbps*100
+    const traffic = {
+        bytespersecond,
+        kbps,
+        '%': percent
+    }
+    console.log(traffic)
+
+    axios.post('http://localhost:3000', {'%': percent}, {headers: { 'Content-Type': 'application/json'}})
+    .catch(() => {})
+    sendDataToAllClients({bandwidth: percent})
+})
+monitor.run()
 
 const packetMon = new packetMonitor([new IPv4LookupList('whitelist.json', 'Whitelist'), new IPv4LookupList('blacklist.json', 'Blacklist') ])
 
