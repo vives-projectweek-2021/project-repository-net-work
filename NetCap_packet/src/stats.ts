@@ -51,6 +51,19 @@ class Stats {
         else if(protocol === 'udp' && direction === 'to') {
             stat.UDP_to += length
         }
+
+        if(isNaN(stat.UDP_from)) {
+            stat.UDP_from = 0
+        }
+        if(isNaN(stat.UDP_to)) {
+            stat.UDP_to = 0
+        }
+        if(isNaN(stat.TCP_from)) {
+            stat.TCP_from = 0
+        }
+        if(isNaN(stat.TCP_to)) {
+            stat.TCP_to = 0
+        }
     }
 }
 
