@@ -8,27 +8,34 @@
     <p>uitleg project</p>
   </div>
   <h3>Bandwidth in use:</h3>
-  <k-progress :percent="bandwidth" color="#f5da3f"/>
+  <k-progress
+    bg-color="rgb(169, 169, 169)"
+    lineHeight="10"
+    :percent="bandwidth"
+    :color="percentColor"
+  />
 
-  <h3>Captured data overview</h3>      
+  <h3>Captured data overview</h3>    
+
+  <div class="columnGrid gridGap20"> 
     <div v-for="list in stats" :key="list" class="card grey lighten-1">
       <span class="card-title" style="margin: 20px;">{{list.name}}</span>
-      <div style="display:grid; grid-auto-flow:column;" class="grey lighten-2">
-        <div class="center">
-          TO
-        <ul>
-          <li v-for="item in list.to" :key=" item">{{item.ip}} : {{item.data}}</li>
-        </ul>
-        </div>
-        <div class="center">
-          FROM
-        <ul>
-          <li v-for="item in list.from" :key=" item">{{item.ip}} : {{item.data}}</li>
-        </ul>
-        </div>
+      <div class="columnGrid grey lighten-2">
+          <ul class="collection with-header" v-for="direction in ['to','from']" :key="direction">
+            <li class="collection-header grey lighten-2 center"><h6>{{direction.toUpperCase()}}</h6></li>
+            <li class="collection-item grey lighten-3" v-for="item in list[direction]" :key=" item">
+              <strong class="title">{{item.data}}</strong>
+              <span class="title right">{{item.ip}}</span>
+              <span v-if="item.filterNames.length !== 0" style="display:block;">
+                [{{item.filterNames.join(' | ')}}]
+              </span>
+              <span v-else style="display:block;">&nbsp;</span>
+            </li>
+          </ul>
       </div>
     </div>
      
+  </div>
     <footer class="footer">
       <p>
       <strong>Net-work</strong> by Dimi Catrysse, Emiel Coucke, Seppe De Witte, Sirine Rajhi - Project Week 2021
@@ -51,21 +58,33 @@ export default {
     this.ws.addEventListener('message', message => {
       const data = JSON.parse(message.data)
       if(data.stats) {
+        console.log(data.stats)
         this.stats = data.stats
       }
       else if(data.bandwidth)
       {
         let bandwidth = data.bandwidth
-        bandwidth<0?0:bandwidth
-        bandwidth>100?100:bandwidth
+        bandwidth = bandwidth<0?0:bandwidth
+        bandwidth = bandwidth>100?100:bandwidth
         this.bandwidth = bandwidth
       }
       console.log(data)
     })
-    this.askstats(5)
+    //this.askstats(5)
 
   },
   methods: {
+    percentColor(percent) {
+      if(percent<33) {
+        return "#9ECBA7"
+      }
+      else if (percent > 66) {
+        return "#E7465E"
+      }
+      else {
+        return "#F5DA3F"
+      }
+    },
     askstats(amount) {
       this.sendWSData({stats: amount})
     },
@@ -109,28 +128,15 @@ header p {
 h3 {
   color: rgb(169, 169, 169);
   text-align: center;
-  font: 12;
-}
-/*
-.card-title {
-  text-decoration: none;
-  font-weight: bolder;
-    background-color: rgb(169, 169, 169) ;
-color: white;
 }
 
-.card {
-  background-color: rgb(169, 169, 169) ;
+.columnGrid {
+  display: grid;
+  grid-auto-flow: column; 
 }
-
-.card ul {
-  background-color: rgb(169, 169, 169) ;
+.gridGap20 {
+  grid-gap: 20px;
 }
-
-.card ul li {
-  background-color: rgb(169, 169, 169) ;
-}
-*/
 
 footer {
   text-align: center;

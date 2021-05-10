@@ -1,5 +1,5 @@
 {
-  "name": "netcap",
+  "name": "netcap_bandwidth",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,9 +12,11 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^14.14.41",
-    "axios": "^0.21.1",
+    "@types/ws": "^7.4.2",
     "nodemon": "^2.0.7",
-    "pcap": "^3.1.0",
     "ts-node": "^9.1.1"
+  },
+  "dependencies": {
+    "ws": "^7.4.5"
   }
 }

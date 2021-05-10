@@ -2,22 +2,43 @@
 const MAX_kbps = 1000000
 
 import {BandwidthMonitor} from './bandwidthMonitor'
-import axios from 'axios'
+//import axios from 'axios'
 const monitor = new BandwidthMonitor()
 
-monitor.on('data', data => log(data))
-monitor.run()
+import WebSocket from 'ws'
+const ws = new WebSocket(`ws://localhost:4000`)
 
-function log(data: any) {
+monitor.on('data', data => {
     const bytespersecond = data.rx.bytespersecond
     const kbps = bytespersecond/125
+    const percent =  kbps/MAX_kbps*100
     const traffic = {
         bytespersecond,
         kbps,
-        '%': kbps/MAX_kbps*100
+        '%': percent
     }
     console.log(traffic)
 
-    axios.post('http://localhost:3000', {'%': kbps/MAX_kbps*100}, {headers: { 'Content-Type': 'application/json'}})
+    /*
+    axios.post('http://localhost:3000', {'%': percent}, {headers: { 'Content-Type': 'application/json'}})
     .catch(() => {})
+    */
+    sendWSData({bandwidth: percent.toFixed(2)})
+})
+
+monitor.run()
+sendWSData({internal: true})
+
+function sendWSData(data: any) {
+    if(ws.readyState === 1) {
+        ws.send(JSON.stringify(data))
+    } else {
+        const retryInterval = setInterval( () => {
+        if(ws.readyState)
+        {
+            ws.send(JSON.stringify(data))
+            clearInterval(retryInterval)
+        }
+        }, 100)
+    }
 }

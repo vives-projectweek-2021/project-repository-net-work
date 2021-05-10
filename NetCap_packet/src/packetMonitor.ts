@@ -12,7 +12,6 @@ class packetMonitor {
     private lookupLists: IPv4LookupList[] = []
     private stats: Stats[] = []
     private pcapSession: PcapSession|undefined = undefined
-    private startTime: Date|undefined = undefined
 
     constructor(lookupLists: IPv4LookupList[]) {
         this.lookupLists = lookupLists
@@ -22,10 +21,14 @@ class packetMonitor {
         })
         this.startSession()
     }
+    
+    public isRunning() {
+        return this.pcapSession !== undefined
+    }
 
     public start() {
         let started = false
-        if(this.pcapSession === undefined) {
+        if(!this.isRunning()) {
             this.startSession()
             started = true
         }
@@ -34,7 +37,7 @@ class packetMonitor {
 
     public stop() {
         let stopped = false
-        if(this.pcapSession !== undefined)
+        if(this.isRunning())
         {
             this.stopSession()
             stopped = true
@@ -54,8 +57,6 @@ class packetMonitor {
     }
 
     private startSession() {
-        this.startTime = new Date()
-
         this.pcapSession = pcap.createSession('eth0', {
             filter: 'ip proto \\tcp or ip proto \\udp'
         })
@@ -71,8 +72,6 @@ class packetMonitor {
             const dest = IpPacket.daddr.toString()
             const src = IpPacket.saddr.toString()
         
-            const srcPrivate = bogon.isPrivate(src)
-            const destPrivate = bogon.isPrivate(dest)
             const srcBogon = bogon.isBogon(src)
             const destBogon = bogon.isBogon(dest)
         
@@ -82,16 +81,16 @@ class packetMonitor {
             if(srcBogon&&destBogon) {
                 return
             }
-            else if(srcPrivate && !destPrivate) {
+            else if(srcBogon && !destBogon) {
                 ip = dest
             }
-            else if(!srcPrivate && destPrivate) {
+            else if(!srcBogon && destBogon) {
                 ip = src
                 direction = 'from'
             }
         
             let _stats: Stats[] = []
-            _stats.forEach(stat => {
+            this.stats.forEach(stat => {
                 if(stat.contains(ip))
                 {
                     _stats.push(stat)
@@ -122,14 +121,15 @@ class packetMonitor {
 
     public topStats(amount: number) {
         let result: topStatList[] = []
-        this.stats.forEach(list => {
+        const stats: Stats[] = JSON.parse(JSON.stringify(this.stats))
+        stats.forEach(list => {
             let topStats_to: topStat[] = []
-            list.stats.sort((a,b)=>(b.TCP_to + b.UDP_to) - (a.TCP_to + b.UDP_to)).slice(0,amount).forEach(stat => {
-                topStats_to.push({ip: stat.ip, data: humanizeBytes(stat.TCP_to + stat.UDP_to) })
+            list.stats.sort((a,b)=>(b.TCP_to + b.UDP_to) - (a.TCP_to + a.UDP_to)).slice(0,amount).forEach(stat => {
+                topStats_to.push({ip: stat.ip, data: humanizeBytes(stat.TCP_to + stat.UDP_to), filterNames: Array.from(new Set(stat.filterNames))})
             });
             let topStats_from: topStat[] = []
-            list.stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + b.UDP_from)).slice(0,amount).forEach(stat => {
-                topStats_from.push({ip: stat.ip, data: humanizeBytes(stat.TCP_from + stat.UDP_from) })
+            list.stats.sort((a,b)=>(b.TCP_from + b.UDP_from) - (a.TCP_from + a.UDP_from)).slice(0,amount).forEach(stat => {
+                topStats_from.push({ip: stat.ip, data: humanizeBytes(stat.TCP_from + stat.UDP_from), filterNames: Array.from(new Set(stat.filterNames))})
             });
             let topStatList: topStatList = {
                 name: list.name,
@@ -148,7 +148,8 @@ interface topStatList {
 }
 interface topStat {
     ip: string,
-    data: string
+    data: string,
+    filterNames: string[]
 }
 
 export default packetMonitor
