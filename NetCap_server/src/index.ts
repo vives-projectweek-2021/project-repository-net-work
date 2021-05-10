@@ -15,13 +15,9 @@ server.listen(port, () => {
 let clients: Array<WebSocket> = []
 function sendDataToAllClients(data: object) {
     clients.forEach(client => {
-        sendDataToClient(client, data)
+        client.send(JSON.stringify(data))
     });
 }
-function sendDataToClient(client: WebSocket, data: object) {
-    client.send(JSON.stringify(data))
-}
-
 let internal: Array<WebSocket> = []
 function sendInternalData(data: object) {
     internal.forEach(client => {

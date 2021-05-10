@@ -4,9 +4,6 @@
   <h1>Net-Work</h1>
   <p>Overview of captured network data</p>
   </header>
-  <div class="intro">
-    <p>uitleg project</p>
-  </div>
   <h3>Bandwidth in use:</h3>
   <k-progress
     bg-color="rgb(169, 169, 169)"
@@ -20,7 +17,7 @@
   <div class="columnGrid gridGap20"> 
     <div v-for="list in stats" :key="list" class="card grey lighten-1">
       <span class="card-title" style="margin: 20px;">{{list.name}}</span>
-      <div class="columnGrid grey lighten-2">
+      <div class="columnGrid gridGap20 grey lighten-2">
           <ul class="collection with-header" v-for="direction in ['to','from']" :key="direction">
             <li class="collection-header grey lighten-2 center"><h6>{{direction.toUpperCase()}}</h6></li>
             <li class="collection-item grey lighten-3" v-for="item in list[direction]" :key=" item">

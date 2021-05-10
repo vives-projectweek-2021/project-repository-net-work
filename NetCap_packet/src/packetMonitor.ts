@@ -48,6 +48,9 @@ class packetMonitor {
     public reset() {
         this.stopSession()
         this.stats = [new Stats(DEFAULT_STAT_NAME)]
+        this.lookupLists.forEach(list => {
+            this.stats.push(new Stats(list.name))
+        })
         this.startSession()
     }
 
