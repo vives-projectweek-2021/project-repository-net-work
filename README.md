@@ -26,13 +26,25 @@ Install vnstat version 2.6 from [here](https://github.com/vergoh/vnstat)
 Run `npm install` in each subfolder execpt for the ledstrip_driver.  
 To install the required files of the ledstrip, follow the steps in it's README.
 
+Enable raw capturing data for node. More info can be found [here](https://www.blogging-it.com/node-pcap-module-error-socket-operation-not-permitted-fehler-wenn-pcapsession-geoeffnet-wird/programmierung/javascript/nodejs.html).  
+This can be done with following command:  
+```bash
+sudo setcap 'cap_net_raw,cap_net_admin+eip' $(readlink -f $(which node))
+```
+
 ## Running the final result
+
+When not using the packet monitor, you must configure the ethernet interface in 'Promiscuous Mode'.
+```bash
+sudo ip link set eth0 promisc on
+```
 
 ### WebSocket server
 
 ```bash
 bash ./run_netcap_server.sh
 ```
+This program must run first.
 
 ### NetCap bandwidth monitor
 
