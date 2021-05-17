@@ -1,5 +1,7 @@
 # Net-Work
 
+[![Youtube image](https://img.youtube.com/vi/tUFfpEElehE/maxres1.jpg)](https://www.youtube.com/watch?v=tUFfpEElehE)
+
 ## Team Members
 
 * Seppe De Witte
